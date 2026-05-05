@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-use File::Spec;
 use JSON::PP qw(encode_json);
 
 our @EXPORT_OK = qw(
@@ -26,17 +25,19 @@ sub capture_command {
         return ($rc, $out);
     }
 
-    my $null_fh;
-    if ($args{quiet}) {
-        open $null_fh, '>', File::Spec->devnull() or return (1, undef);
+    if (!$args{quiet}) {
+        open my $fh, '-|', @cmd or return (1, undef);
+        local $/;
+        my $out = <$fh>;
+        close $fh;
+        return (($? >> 8), $out);
     }
 
-    local *STDERR = $null_fh if $args{quiet};
-    open my $fh, '-|', @cmd or return (1, undef);
+    my $command = join q{ }, map { shell_quote($_) } @cmd;
+    open my $fh, '-|', 'sh', '-lc', "$command 2>/dev/null" or return (1, undef);
     local $/;
     my $out = <$fh>;
     close $fh;
-
     return (($? >> 8), $out);
 }
 
@@ -71,6 +72,13 @@ sub json_error {
 sub json_string {
     my ($value) = @_;
     return encode_json($value);
+}
+
+sub shell_quote {
+    my ($value) = @_;
+    $value = q{} if !defined $value;
+    $value =~ s/'/'"'"'/g;
+    return q{'} . $value . q{'};
 }
 
 1;

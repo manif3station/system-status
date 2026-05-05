@@ -65,3 +65,10 @@ Platform note:
   - retry after `smc` sampler rejection into a supported `powermetrics` sampler set
   - `iStats` fallback
   - quiet failure when no backend exists
+
+2026-05-05 quiet subprocess fix:
+
+- reran `t/02-load.t` and `t/03-temperature.t` after changing the quiet probe runner
+- direct helper proof now shows `capture_command(quiet => 1, ...)` keeps stdout and discards child stderr
+- full Docker re-run is required before release close for this patch version
+- installed `dashboard ...` proof for this patch is currently blocked by a DD core syntax error in `~/.developer-dashboard/cli/dd/_dashboard-core`

@@ -1,3 +1,7 @@
+0.03 2026-05-05
+ - suppress child stderr from quiet optional probes at the subprocess layer
+ - keep macOS temperature fallback probing quiet when powermetrics or iStats are unavailable or require elevation
+
 0.02 2026-05-05
  - fix macOS CPU temperature probing to retry supported powermetrics samplers
  - suppress missing optional sensor-backend noise from temperature probes
