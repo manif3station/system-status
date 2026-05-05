@@ -50,7 +50,7 @@ Observed results:
 - `dashboard system-status.load memory`
   - returned `{"memory":{"total":[39.4,"GB","100%"],"free":[21.1,"GB","53.55%"]}}`
 - `dashboard system-status.temperature cpu`
-  - returned `{"cpu":{"temperature":{"celsius":[63,"C"],"fahrenheit":[145.4,"F"]}}}`
+  - returned `{"cpu":{"temperature":{"celsius":[63,"°C"],"fahrenheit":[145.4,"°F"]}}}`
 
 Platform note:
 
@@ -79,5 +79,6 @@ Platform note:
   - `osx-cpu-temp`
   - `powermetrics`
   - `iStats`
+- the temperature payload examples now use `°C` and `°F`
 - `brewfile` now declares `osx-cpu-temp`
 - full Docker suite passed after the backend-order update: `Files=6, Tests=145`

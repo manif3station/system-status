@@ -143,7 +143,7 @@ Example:
       "command": "dashboard system-status.temperature cpu",
       "cwd": "home",
       "indicator": {
-        "icon": "[% cpu.temperature.celsius.0 %]C TEMP"
+        "icon": "[% cpu.temperature.celsius.0 %]°C TEMP"
       },
       "interval": 5,
       "name": "cpu-temp",
@@ -218,7 +218,7 @@ dashboard system-status.temperature cpu
 Support means the skill has explicit platform-aware code paths and automated tests for those branches. Some sensor-heavy checks still depend on what the host exposes.
 For this release, Linux runtime proof was completed through the real `dashboard` entrypoint. `macdev` and `windev` were down during the release gate, so macOS and Windows were covered by automated platform-branch tests rather than live host runs.
 
-On macOS, `dashboard system-status.temperature cpu` now tries `osx-cpu-temp` first, then retries `powermetrics` with supported sampler combinations, and finally falls back to `iStats` if it is installed. If none of those backends is available, the command returns a clean JSON error instead of leaking raw tool-launch noise.
+On macOS, `dashboard system-status.temperature cpu` now tries `osx-cpu-temp` first, then retries `powermetrics` with supported sampler combinations, and finally falls back to `iStats` if it is installed. Bogus `0°C` readings from `osx-cpu-temp` are rejected and do not count as a valid CPU temperature. If none of those backends is available, the command returns a clean JSON error instead of leaking raw tool-launch noise.
 
 ## Documentation
 

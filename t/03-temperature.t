@@ -47,7 +47,7 @@ sub capture_main {
         },
         capture => sub { return ( 1, undef ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[61,"C"\]/, 'linux cpu temperature can come from hwmon' );
+    like( $result->{stdout}, qr/"celsius":\[61,"°C"\]/, 'linux cpu temperature can come from hwmon' );
 }
 
 {
@@ -67,7 +67,7 @@ sub capture_main {
         },
         capture => sub { return ( 1, undef ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[53,"C"\]/, 'linux cpu temperature can come from thermal zones' );
+    like( $result->{stdout}, qr/"celsius":\[53,"°C"\]/, 'linux cpu temperature can come from thermal zones' );
 }
 
 {
@@ -78,7 +78,7 @@ sub capture_main {
         glob_paths => sub { return () },
         capture    => sub { return ( 0, "Package id 0: +57.5°C\n" ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[57.5,"C"\]/, 'linux cpu temperature can come from sensors' );
+    like( $result->{stdout}, qr/"celsius":\[57.5,"°C"\]/, 'linux cpu temperature can come from sensors' );
 }
 
 {
@@ -91,7 +91,21 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[51.2,"C"\]/, 'macOS cpu temperature prefers osx-cpu-temp when available' );
+    like( $result->{stdout}, qr/"celsius":\[51.2,"°C"\]/, 'macOS cpu temperature prefers osx-cpu-temp when available' );
+}
+
+{
+    my $result = SystemStatus::Temperature::run(
+        argv    => ['cpu'],
+        os      => 'darwin',
+        capture => sub {
+            my (@cmd) = @_;
+            return ( 0, "0°C\n" ) if $cmd[0] eq 'osx-cpu-temp';
+            return ( 0, "CPU die temperature: 49.5 C\n" ) if $cmd[0] eq '/usr/bin/powermetrics';
+            return ( 1, undef );
+        },
+    );
+    like( $result->{stdout}, qr/"celsius":\[49.5,"°C"\]/, 'macOS cpu temperature rejects bogus osx-cpu-temp zero output and falls back' );
 }
 
 {
@@ -105,7 +119,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[49.5,"C"\]/, 'macOS cpu temperature can come from powermetrics' );
+    like( $result->{stdout}, qr/"celsius":\[49.5,"°C"\]/, 'macOS cpu temperature can come from powermetrics' );
 }
 
 {
@@ -120,7 +134,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[48,"C"\]/, 'macOS cpu temperature can fall back to istats' );
+    like( $result->{stdout}, qr/"celsius":\[48,"°C"\]/, 'macOS cpu temperature can fall back to istats' );
 }
 
 {
@@ -139,7 +153,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[47.25,"C"\]/, 'macOS cpu temperature retries powermetrics with supported samplers' );
+    like( $result->{stdout}, qr/"celsius":\[47.25,"°C"\]/, 'macOS cpu temperature retries powermetrics with supported samplers' );
 }
 
 {
@@ -153,7 +167,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[46,"C"\]/, 'macOS cpu temperature can use the broader powermetrics cpu parser' );
+    like( $result->{stdout}, qr/"celsius":\[46,"°C"\]/, 'macOS cpu temperature can use the broader powermetrics cpu parser' );
 }
 
 {
@@ -171,7 +185,7 @@ sub capture_main {
         os      => 'MSWin32',
         capture => sub { return ( 0, "44.5\n" ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[44.5,"C"\]/, 'windows cpu temperature uses PowerShell' );
+    like( $result->{stdout}, qr/"celsius":\[44.5,"°C"\]/, 'windows cpu temperature uses PowerShell' );
 }
 
 {
@@ -200,7 +214,7 @@ sub capture_main {
         os      => 'linux',
         capture => sub { return ( 0, "66\n" ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[66,"C"\]/, 'gpu temperature prefers nvidia-smi' );
+    like( $result->{stdout}, qr/"celsius":\[66,"°C"\]/, 'gpu temperature prefers nvidia-smi' );
 }
 
 {
@@ -221,7 +235,7 @@ sub capture_main {
         },
         capture => sub { return ( 1, undef ) },
     );
-    like( $result->{stdout}, qr/"celsius":\[72,"C"\]/, 'linux gpu temperature can come from hwmon' );
+    like( $result->{stdout}, qr/"celsius":\[72,"°C"\]/, 'linux gpu temperature can come from hwmon' );
 }
 
 {
@@ -237,7 +251,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[63,"C"\]/, 'linux gpu temperature can come from rocm-smi' );
+    like( $result->{stdout}, qr/"celsius":\[63,"°C"\]/, 'linux gpu temperature can come from rocm-smi' );
 }
 
 {
@@ -254,7 +268,7 @@ sub capture_main {
             return ( 1, undef );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[70,"C"\]/, 'linux gpu temperature can come from sensors' );
+    like( $result->{stdout}, qr/"celsius":\[70,"°C"\]/, 'linux gpu temperature can come from sensors' );
 }
 
 {
@@ -267,7 +281,7 @@ sub capture_main {
             return ( 0, "51\n" );
         },
     );
-    like( $result->{stdout}, qr/"celsius":\[51,"C"\]/, 'windows gpu temperature uses PowerShell' );
+    like( $result->{stdout}, qr/"celsius":\[51,"°C"\]/, 'windows gpu temperature uses PowerShell' );
 }
 
 {
@@ -304,7 +318,7 @@ is( SystemStatus::Temperature::read_first_line( '/fake/line', read_file => sub {
 is( SystemStatus::Temperature::max_temp_c( 20, 30, 25 ), 30, 'max_temp_c selects the hottest value' );
 ok( SystemStatus::Temperature::valid_temp_c(50), 'valid_temp_c accepts sane temperatures' );
 ok( !SystemStatus::Temperature::valid_temp_c(500), 'valid_temp_c rejects impossible temperatures' );
-like( SystemStatus::Temperature::print_temperature_result( 'cpu', 50 ), qr/"fahrenheit":\[122,"F"\]/, 'temperature renderer works directly' );
+like( SystemStatus::Temperature::print_temperature_result( 'cpu', 50 ), qr/"fahrenheit":\[122,"°F"\]/, 'temperature renderer works directly' );
 is_deeply( [ SystemStatus::Temperature::glob_paths( '/tmp/whatever', glob_paths => sub { return ('x') } ) ], ['x'], 'temperature glob helper can be injected' );
 is( scalar( SystemStatus::Temperature::glob_paths('/definitely/not/a/match/*') ) || 0, 0, 'temperature glob helper falls back to builtin glob' );
 

@@ -40,8 +40,8 @@ Usage:
   system-temperature gpu
 
 Examples:
-  {"cpu":{"temperature":{"celsius":[55,"C"],"fahrenheit":[131,"F"]}}}
-  {"gpu":{"temperature":{"celsius":[62,"C"],"fahrenheit":[143.6,"F"]}}}
+  {"cpu":{"temperature":{"celsius":[55,"°C"],"fahrenheit":[131,"°F"]}}}
+  {"gpu":{"temperature":{"celsius":[62,"°C"],"fahrenheit":[143.6,"°F"]}}}
 TXT
 }
 
@@ -270,7 +270,10 @@ sub macos_cpu_temperature_c {
             cmd     => $cmd,
         );
         if ($rc == 0 && defined $out) {
-            return ($1, undef) if $out =~ /([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
+            if ( $out =~ /([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i ) {
+                my $temp = $1;
+                return ($temp, undef) if $temp > 0 && valid_temp_c($temp);
+            }
         }
     }
 
@@ -347,7 +350,7 @@ sub print_temperature_result {
     my ($label, $temp_c) = @_;
     my $temp_f = ($temp_c * 9 / 5) + 32;
     return sprintf(
-        '{"%s":{"temperature":{"celsius":[%s,"C"],"fahrenheit":[%s,"F"]}}}' . "\n",
+        '{"%s":{"temperature":{"celsius":[%s,"°C"],"fahrenheit":[%s,"°F"]}}}' . "\n",
         $label,
         fmt_num($temp_c),
         fmt_num($temp_f),
