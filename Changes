@@ -1,0 +1,5 @@
+0.01 2026-05-05
+ - package the initial system-status DD skill
+ - standardize disk, load, and temperature commands
+ - add Linux, macOS, and Windows-aware code paths
+ - add tests, docs, and release-gate records
