@@ -71,7 +71,6 @@ Platform note:
 - reran `t/02-load.t` and `t/03-temperature.t` after changing the quiet probe runner
 - direct helper proof now shows `capture_command(quiet => 1, ...)` keeps stdout and discards child stderr
 - full Docker re-run completed for the patch version
-- installed `dashboard ...` proof for this patch is currently blocked by a DD core syntax error in `~/.developer-dashboard/cli/dd/_dashboard-core`
 
 2026-05-05 macOS Homebrew backend:
 
@@ -96,4 +95,8 @@ Platform note:
 - observed result:
   - `{"error":"CPU temperature is not available on macOS unless osx-cpu-temp, powermetrics, or a compatible sensor tool is available."}`
 - this proves the skill rejects the bogus `0.0°C` reading instead of returning fake success
-- direct `dashboard ...` proof on `macdev` is still blocked by that host's DD runtime missing `Developer/Dashboard/Platform.pm`
+- real DD proof through `~/.zshrc`-loaded shell:
+  - `dashboard skills install /tmp/system-status`
+  - `dashboard system-status.temperature cpu`
+- observed result:
+  - `{"error":"CPU temperature is not available on macOS unless osx-cpu-temp, powermetrics, or a compatible sensor tool is available."}`
