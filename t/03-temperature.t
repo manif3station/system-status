@@ -87,6 +87,20 @@ sub capture_main {
         os      => 'darwin',
         capture => sub {
             my (@cmd) = @_;
+            return ( 0, "51.2°C\n" ) if $cmd[0] eq 'osx-cpu-temp';
+            return ( 1, undef );
+        },
+    );
+    like( $result->{stdout}, qr/"celsius":\[51.2,"C"\]/, 'macOS cpu temperature prefers osx-cpu-temp when available' );
+}
+
+{
+    my $result = SystemStatus::Temperature::run(
+        argv    => ['cpu'],
+        os      => 'darwin',
+        capture => sub {
+            my (@cmd) = @_;
+            return ( 1, undef ) if $cmd[0] =~ /osx-cpu-temp$/;
             return ( 0, "CPU die temperature: 49.5 C\n" ) if $cmd[0] eq '/usr/bin/powermetrics';
             return ( 1, undef );
         },
@@ -100,6 +114,7 @@ sub capture_main {
         os      => 'darwin',
         capture => sub {
             my (@cmd) = @_;
+            return ( 1, undef ) if $cmd[0] =~ /osx-cpu-temp$/;
             return ( 1, undef ) if $cmd[0] eq '/usr/bin/powermetrics';
             return ( 0, "CPU temp: 48.0°C\n" ) if $cmd[0] eq 'istats';
             return ( 1, undef );
@@ -115,6 +130,7 @@ sub capture_main {
         os      => 'darwin',
         capture => sub {
             my (@cmd) = @_;
+            return ( 1, undef ) if $cmd[0] =~ /osx-cpu-temp$/;
             if ($cmd[0] eq '/usr/bin/powermetrics') {
                 $calls++;
                 return ( 1, "powermetrics: unrecognized sampler: smc\n" ) if $calls == 1;
@@ -132,6 +148,7 @@ sub capture_main {
         os      => 'darwin',
         capture => sub {
             my (@cmd) = @_;
+            return ( 1, undef ) if $cmd[0] =~ /osx-cpu-temp$/;
             return ( 0, "CPU average: 46.0 C\n" ) if $cmd[0] eq '/usr/bin/powermetrics';
             return ( 1, undef );
         },

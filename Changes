@@ -1,3 +1,7 @@
+0.04 2026-05-05
+ - add a macOS Homebrew backend path for CPU temperature via `osx-cpu-temp`
+ - try `osx-cpu-temp` before `powermetrics` or `iStats` on macOS
+
 0.03 2026-05-05
  - suppress child stderr from quiet optional probes at the subprocess layer
  - keep macOS temperature fallback probing quiet when powermetrics or iStats are unavailable or require elevation

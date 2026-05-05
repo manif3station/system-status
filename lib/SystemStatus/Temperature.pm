@@ -58,7 +58,7 @@ sub cpu_temperature_c {
     if ($os eq 'darwin') {
         my ($temp, $err) = macos_cpu_temperature_c(%args);
         return ($temp, undef) if !defined $err;
-        return (undef, 'CPU temperature is not available on macOS unless powermetrics or a compatible sensor tool is available.');
+        return (undef, 'CPU temperature is not available on macOS unless osx-cpu-temp, powermetrics, or a compatible sensor tool is available.');
     }
 
     for my $probe (\&linux_cpu_temperature_from_hwmon, \&linux_cpu_temperature_from_thermal_zone, \&linux_cpu_temperature_from_sensors) {
@@ -259,6 +259,21 @@ sub windows_gpu_temperature_c {
 
 sub macos_cpu_temperature_c {
     my (%args) = @_;
+    for my $cmd (
+        [ 'osx-cpu-temp' ],
+        [ '/opt/homebrew/bin/osx-cpu-temp' ],
+        [ '/usr/local/bin/osx-cpu-temp' ],
+    ) {
+        my ($rc, $out) = capture_command(
+            capture => $args{capture},
+            quiet   => 1,
+            cmd     => $cmd,
+        );
+        if ($rc == 0 && defined $out) {
+            return ($1, undef) if $out =~ /([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
+        }
+    }
+
     for my $cmd (
         [ '/usr/bin/powermetrics', '-n', '1', '--samplers', 'smc' ],
         [ '/usr/bin/powermetrics', '-n', '1', '--samplers', 'cpu_power,thermal' ],

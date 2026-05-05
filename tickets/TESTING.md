@@ -70,5 +70,14 @@ Platform note:
 
 - reran `t/02-load.t` and `t/03-temperature.t` after changing the quiet probe runner
 - direct helper proof now shows `capture_command(quiet => 1, ...)` keeps stdout and discards child stderr
-- full Docker re-run is required before release close for this patch version
+- full Docker re-run completed for the patch version
 - installed `dashboard ...` proof for this patch is currently blocked by a DD core syntax error in `~/.developer-dashboard/cli/dd/_dashboard-core`
+
+2026-05-05 macOS Homebrew backend:
+
+- `t/03-temperature.t` now proves macOS CPU temperature selection in this order:
+  - `osx-cpu-temp`
+  - `powermetrics`
+  - `iStats`
+- `brewfile` now declares `osx-cpu-temp`
+- full Docker suite passed after the backend-order update: `Files=6, Tests=145`
