@@ -85,7 +85,11 @@ sub capture_main {
     my $result = SystemStatus::Temperature::run(
         argv    => ['cpu'],
         os      => 'darwin',
-        capture => sub { return ( 0, "CPU die temperature: 49.5 C\n" ) },
+        capture => sub {
+            my (@cmd) = @_;
+            return ( 0, "CPU die temperature: 49.5 C\n" ) if $cmd[0] eq '/usr/bin/powermetrics';
+            return ( 1, undef );
+        },
     );
     like( $result->{stdout}, qr/"celsius":\[49.5,"C"\]/, 'macOS cpu temperature can come from powermetrics' );
 }
@@ -96,12 +100,43 @@ sub capture_main {
         os      => 'darwin',
         capture => sub {
             my (@cmd) = @_;
-            return ( 1, undef ) if $cmd[0] eq 'powermetrics';
+            return ( 1, undef ) if $cmd[0] eq '/usr/bin/powermetrics';
             return ( 0, "CPU temp: 48.0°C\n" ) if $cmd[0] eq 'istats';
             return ( 1, undef );
         },
     );
     like( $result->{stdout}, qr/"celsius":\[48,"C"\]/, 'macOS cpu temperature can fall back to istats' );
+}
+
+{
+    my $calls = 0;
+    my $result = SystemStatus::Temperature::run(
+        argv    => ['cpu'],
+        os      => 'darwin',
+        capture => sub {
+            my (@cmd) = @_;
+            if ($cmd[0] eq '/usr/bin/powermetrics') {
+                $calls++;
+                return ( 1, "powermetrics: unrecognized sampler: smc\n" ) if $calls == 1;
+                return ( 0, "CPU die temperature: 47.25 C\n" ) if $calls == 2;
+            }
+            return ( 1, undef );
+        },
+    );
+    like( $result->{stdout}, qr/"celsius":\[47.25,"C"\]/, 'macOS cpu temperature retries powermetrics with supported samplers' );
+}
+
+{
+    my $result = SystemStatus::Temperature::run(
+        argv    => ['cpu'],
+        os      => 'darwin',
+        capture => sub {
+            my (@cmd) = @_;
+            return ( 0, "CPU average: 46.0 C\n" ) if $cmd[0] eq '/usr/bin/powermetrics';
+            return ( 1, undef );
+        },
+    );
+    like( $result->{stdout}, qr/"celsius":\[46,"C"\]/, 'macOS cpu temperature can use the broader powermetrics cpu parser' );
 }
 
 {

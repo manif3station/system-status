@@ -127,13 +127,14 @@ sub linux_cpu_temperature_from_sensors {
     my (%args) = @_;
     my ($rc, $out) = capture_command(
         capture => $args{capture},
+        quiet   => 1,
         cmd     => [ 'sensors' ],
     );
     return (undef, 'sensors unavailable') if $rc != 0 || !defined $out;
 
     my @values;
     for my $line (split /\r?\n/, $out) {
-        push @values, $2 if $line =~ /(Package|Core|Tctl|Tdie|CPU|CCD).*?([+-]?\d+(?:\.\d+)?)\s*°?C/i;
+        push @values, $2 if $line =~ /(Package|Core|Tctl|Tdie|CPU|CCD).*?([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
     }
 
     my $temp = max_temp_c(@values);
@@ -144,6 +145,7 @@ sub gpu_temperature_from_nvidia_smi {
     my (%args) = @_;
     my ($rc, $out) = capture_command(
         capture => $args{capture},
+        quiet   => 1,
         cmd     => [ 'nvidia-smi', '--query-gpu=temperature.gpu', '--format=csv,noheader,nounits' ],
     );
     return (undef, 'nvidia-smi unavailable') if $rc != 0 || !defined $out;
@@ -180,6 +182,7 @@ sub linux_gpu_temperature_from_rocm_smi {
     my (%args) = @_;
     my ($rc, $out) = capture_command(
         capture => $args{capture},
+        quiet   => 1,
         cmd     => [ 'rocm-smi', '--showtemp' ],
     );
     return (undef, 'rocm-smi unavailable') if $rc != 0 || !defined $out;
@@ -197,6 +200,7 @@ sub linux_gpu_temperature_from_sensors {
     my (%args) = @_;
     my ($rc, $out) = capture_command(
         capture => $args{capture},
+        quiet   => 1,
         cmd     => [ 'sensors' ],
     );
     return (undef, 'sensors unavailable') if $rc != 0 || !defined $out;
@@ -210,7 +214,7 @@ sub linux_gpu_temperature_from_sensors {
         my $looks_gpu = ($chip || q{}) =~ /(amdgpu|nouveau|nvidia|radeon|i915|gpu)/i
                      || $line =~ /(GPU|edge|junction|hotspot|memory)/i;
         next unless $looks_gpu;
-        push @values, $1 if $line =~ /([+-]?\d+(?:\.\d+)?)\s*°?C/;
+        push @values, $1 if $line =~ /([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/;
     }
 
     my $temp = max_temp_c(@values);
@@ -255,22 +259,37 @@ sub windows_gpu_temperature_c {
 
 sub macos_cpu_temperature_c {
     my (%args) = @_;
-    my ($rc, $out) = capture_command(
-        capture => $args{capture},
-        cmd     => [ 'powermetrics', '--samplers', 'smc', '-n', '1' ],
-    );
-    if ($rc == 0 && defined $out) {
-        for my $line (split /\r?\n/, $out) {
-            return ($1, undef) if $line =~ /CPU.*?([+-]?\d+(?:\.\d+)?)\s*C/i;
+    for my $cmd (
+        [ '/usr/bin/powermetrics', '-n', '1', '--samplers', 'smc' ],
+        [ '/usr/bin/powermetrics', '-n', '1', '--samplers', 'cpu_power,thermal' ],
+        [ '/usr/bin/powermetrics', '-n', '1' ],
+    ) {
+        my ($rc, $out) = capture_command(
+            capture => $args{capture},
+            quiet   => 1,
+            cmd     => $cmd,
+        );
+        if ($rc == 0 && defined $out) {
+            for my $line (split /\r?\n/, $out) {
+                return ($1, undef) if $line =~ /CPU(?:\s+die)?\s+temperature[:=]?\s*([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
+                return ($1, undef) if $line =~ /CPU.*?([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
+            }
         }
     }
 
-    ($rc, $out) = capture_command(
-        capture => $args{capture},
-        cmd     => [ 'istats', 'cpu', 'temp', '--no-graphs' ],
-    );
-    if ($rc == 0 && defined $out) {
-        return ($1, undef) if $out =~ /([+-]?\d+(?:\.\d+)?)\s*°?C/i;
+    for my $cmd (
+        [ 'istats', 'cpu', 'temp', '--no-graphs' ],
+        [ '/opt/homebrew/bin/istats', 'cpu', 'temp', '--no-graphs' ],
+        [ '/usr/local/bin/istats', 'cpu', 'temp', '--no-graphs' ],
+    ) {
+        my ($rc, $out) = capture_command(
+            capture => $args{capture},
+            quiet   => 1,
+            cmd     => $cmd,
+        );
+        if ($rc == 0 && defined $out) {
+            return ($1, undef) if $out =~ /([+-]?\d+(?:\.\d+)?)\s*[^0-9A-Za-z]*\s*C/i;
+        }
     }
 
     return (undef, 'macos cpu unavailable');

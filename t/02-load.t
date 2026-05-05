@@ -347,6 +347,7 @@ is( scalar( SystemStatus::Load::glob_paths('/definitely/not/a/match/*') ) || 0, 
     is_deeply( [ capture_command( cmd => ['definitely-not-a-real-command-xyz'] ) ], [ 1, undef ], 'util capture_command reports real command launch failure cleanly' );
     is_deeply( [ capture_command( capture => sub { return ( undef, undef ) }, cmd => ['ignored'] ) ], [ 0, undef ], 'util capture_command keeps undef output from injected captures' );
     is_deeply( [ capture_command( cmd => [ 'sh', '-lc', 'printf util-ok' ] ) ], [ 0, 'util-ok' ], 'util capture_command can run a real command' );
+    is_deeply( [ capture_command( quiet => 1, cmd => [ 'sh', '-lc', 'printf quiet-ok' ] ) ], [ 0, 'quiet-ok' ], 'util capture_command can run quietly when optional probes should not leak stderr noise' );
     is( run_powershell( capture => sub { return ( 0, " \n" ) }, script => 'noop' ), undef, 'util run_powershell rejects blank output' );
     is( fmt_num(), '0', 'util fmt_num handles undef input' );
     is( json_error('x'), "{\"error\":\"x\"}\n", 'util json_error encodes a json error string' );

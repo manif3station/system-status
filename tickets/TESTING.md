@@ -56,3 +56,12 @@ Platform note:
 
 - live Linux installed-path proof was completed
 - `macdev` and `windev` were down during the release gate, so macOS and Windows validation relied on automated branch coverage inside `t/`
+
+2026-05-05 maintenance fix:
+
+- reran `t/03-temperature.t` locally after the macOS probe fix
+- macOS automated proof now covers:
+  - direct `powermetrics` success
+  - retry after `smc` sampler rejection into a supported `powermetrics` sampler set
+  - `iStats` fallback
+  - quiet failure when no backend exists

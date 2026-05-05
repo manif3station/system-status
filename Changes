@@ -1,3 +1,8 @@
+0.02 2026-05-05
+ - fix macOS CPU temperature probing to retry supported powermetrics samplers
+ - suppress missing optional sensor-backend noise from temperature probes
+ - keep macOS fallback support for iStats on common Homebrew paths
+
 0.01 2026-05-05
  - package the initial system-status DD skill
  - standardize disk, load, and temperature commands
