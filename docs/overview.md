@@ -37,7 +37,7 @@ macOS
 
 - disk checks use `df`
 - load checks use `top`, `sysctl`, and `vm_stat`
-- CPU temperature can use `powermetrics` or `istats` when available
+- CPU temperature can use `osx-cpu-temp`, `powermetrics`, or `istats` when available
 - GPU load and GPU temperature are limited by available vendor tooling
 
 Windows

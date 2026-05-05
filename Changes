@@ -1,7 +1,10 @@
+0.06 2026-05-05
+ - emit `°C` and `°F` in the temperature payload contract
+ - align README and ticket examples with the updated unit labels
+
 0.05 2026-05-05
  - reject bogus `0C` output from the macOS `osx-cpu-temp` backend
  - fall through to `powermetrics` or `iStats` when `osx-cpu-temp` returns an implausible zero reading
- - emit `°C` and `°F` unit labels in temperature output examples and payloads
 
 0.04 2026-05-05
  - add a macOS Homebrew backend path for CPU temperature via `osx-cpu-temp`

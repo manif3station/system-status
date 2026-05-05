@@ -82,3 +82,18 @@ Platform note:
 - the temperature payload examples now use `°C` and `°F`
 - `brewfile` now declares `osx-cpu-temp`
 - full Docker suite passed after the backend-order update: `Files=6, Tests=145`
+
+2026-05-05 degree-unit payload update:
+
+- `t/03-temperature.t` now proves `°C` and `°F` in the emitted temperature payload
+- full Docker suite passed after the payload update: `Files=6, Tests=146`
+
+2026-05-05 macOS host proof on `macdev`:
+
+- `osx-cpu-temp` is installed and currently returns `0.0°C` on that host
+- copied proof tree command:
+  - `cd /tmp/system-status-proof && perl cli/temperature cpu`
+- observed result:
+  - `{"error":"CPU temperature is not available on macOS unless osx-cpu-temp, powermetrics, or a compatible sensor tool is available."}`
+- this proves the skill rejects the bogus `0.0°C` reading instead of returning fake success
+- direct `dashboard ...` proof on `macdev` is still blocked by that host's DD runtime missing `Developer/Dashboard/Platform.pm`
