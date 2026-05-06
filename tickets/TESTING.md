@@ -94,6 +94,19 @@ Platform note:
   - `cd /tmp/system-status-proof && perl cli/temperature cpu`
 - observed result:
   - `{"error":"CPU temperature is not available on macOS unless osx-cpu-temp, powermetrics, or a compatible sensor tool is available."}`
+
+2026-05-06 MIT license gate:
+
+- functional proof:
+  - `docker compose -f ~/projects/skills/docker-compose.testing.yml run --rm perl-test bash -lc 'cd /workspace/skills/system-status && prove -lvr t'`
+  - Result: pass
+- coverage proof:
+  - `docker compose -f ~/projects/skills/docker-compose.testing.yml run --rm perl-test bash -lc 'cd /workspace/skills/system-status && rm -rf cover_db /workspace/cover_db/* && HARNESS_PERL_SWITCHES=-MDevel::Cover prove -lvr t && cover -report text'`
+  - Result: pass
+  - `lib/SystemStatus/Disk.pm` statement `100.0%`, subroutine `100.0%`
+  - `lib/SystemStatus/Load.pm` statement `100.0%`, subroutine `100.0%`
+  - `lib/SystemStatus/Temperature.pm` statement `100.0%`, subroutine `100.0%`
+  - `lib/SystemStatus/Util.pm` statement `100.0%`, subroutine `100.0%`
 - this proves the skill rejects the bogus `0.0°C` reading instead of returning fake success
 - real DD proof through `~/.zshrc`-loaded shell:
   - `dashboard skills install /tmp/system-status`

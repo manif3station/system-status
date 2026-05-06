@@ -62,6 +62,12 @@ Install from a local checkout during development:
 dashboard skills install ~/projects/skills/skills/system-status
 ```
 
+## License
+
+`system-status` is released under the MIT License.
+
+See [LICENSE](LICENSE).
+
 ## How To Use
 
 Check the filesystem that contains the current root mount:
